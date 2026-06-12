@@ -109,7 +109,7 @@ olc::Sprite& olc2C02::GetPatternTable(uint8_t i)
 // comunicacao com o bus principal
 uint8_t olc2C02::cpuRead(uint16_t addr, bool rdonly) {
 	uint8_t data = 0x00;
-	
+
 	switch (addr)
 	{
 	case 0x0000: // Control
@@ -128,7 +128,7 @@ uint8_t olc2C02::cpuRead(uint16_t addr, bool rdonly) {
 		break;
 	case 0x0007: // PPU Data
 		break;
-	}
+}
 
 	return data;
 }

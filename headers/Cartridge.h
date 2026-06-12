@@ -15,7 +15,7 @@ public:
 	bool ImageValid();
 
 	enum MIRROR
-	{
+{
 		HORIZONTAL,
 		VERTICAL,
 		ONESCREEN_LO,
