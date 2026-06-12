@@ -25,6 +25,18 @@
     <Filter Include="Arquivos de Origem\PPU">
       <UniqueIdentifier>{2004b5cf-347f-4ab1-840e-6bc166902983}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Arquivos de Cabeçalho\Cartridge">
+      <UniqueIdentifier>{ead2cc9a-1b74-4b5c-956f-5fb16de18e6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Origem\Cartridge">
+      <UniqueIdentifier>{b6f0e7fa-2815-4ef6-848b-c3a0bd77cb51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\Mapper">
+      <UniqueIdentifier>{0e00fa77-fd36-4488-b255-ee2c6a1b1d8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Origem\Mapper">
+      <UniqueIdentifier>{bcc9709f-927f-41ee-bd9e-2a414e9f3923}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bus.h">
@@ -36,8 +48,17 @@
     <ClInclude Include="olc2C02.h">
       <Filter>Arquivos de Cabeçalho\PPU</Filter>
     </ClInclude>
-    <ClInclude Include="Cartridge.h">
+    <ClInclude Include="olcPixelGameEngine.h">
       <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="Cartridge.h">
+      <Filter>Arquivos de Cabeçalho\Cartridge</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper.h">
+      <Filter>Arquivos de Cabeçalho\Mapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper_000.h">
+      <Filter>Arquivos de Cabeçalho\Mapper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -50,8 +71,17 @@
     <ClCompile Include="olc6502.cpp">
       <Filter>Arquivos de Origem\CPU</Filter>
     </ClCompile>
-    <ClCompile Include="Cartridge.cpp">
+    <ClCompile Include="Testing.cpp">
       <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="Cartridge.cpp">
+      <Filter>Arquivos de Origem\Cartridge</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapper.cpp">
+      <Filter>Arquivos de Origem\Mapper</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapper_000.cpp">
+      <Filter>Arquivos de Origem\Mapper</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

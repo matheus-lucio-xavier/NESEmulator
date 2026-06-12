@@ -4,10 +4,10 @@
 
 Bus::Bus()
 {
-	// Connect CPU to communication bus
+	// conecta cpu ao bus de comunicacao
 	cpu.ConnectBus(this);
 
-	// Clear RAM contents, just in case :P
+	// limpa conteudo da ram
 	for (auto& i : cpuRam) i = 0x00;
 }
 
@@ -18,7 +18,10 @@ Bus::~Bus()
 
 void Bus::cpuWrite(uint16_t addr, uint8_t data)
 {
-	if (addr >= 0x0000 && addr <= 0x1FFF) {
+	if (cart->cpuWrite(addr, data)) {
+
+	}
+	else if (addr >= 0x0000 && addr <= 0x1FFF) {
 		cpuRam[addr & 0x07FF] = data;
 	}
 	else if(addr >= 0x2000 && addr <= 0x3FFF){
@@ -29,7 +32,11 @@ void Bus::cpuWrite(uint16_t addr, uint8_t data)
 uint8_t Bus::cpuRead(uint16_t addr, bool bReadOnly)
 {
 	uint8_t data = 0x00;
-	if (addr >= 0x0000 && addr <= 0x1FFF) {
+
+	if (cart->cpuRead(addr, data)) {
+
+	}
+	else if (addr >= 0x0000 && addr <= 0x1FFF) {
 		data = cpuRam[addr & 0x07FF];
 	}
 	else if (addr >= 0x2000 && addr <= 0x3FFF) {
@@ -37,4 +44,24 @@ uint8_t Bus::cpuRead(uint16_t addr, bool bReadOnly)
 	}
 
 	return data;
+}
+
+void Bus::insertCartridge(const std::shared_ptr<Cartridge>& cartridge) {
+	this->cart = cartridge;
+	ppu.connectCartridge(cartridge);
+}
+void Bus::reset() {
+	cpu.reset();
+	nSystemClockCounter = 0;
+}
+void Bus::clock() {
+	ppu.clock();
+
+	// a cpu roda 3 vezes mais lento que a ppu entao a funcao clock()
+	// so executa a cada 3 vezes que essa funcao e chamada.
+	if (nSystemClockCounter % 3 == 0) {
+		cpu.clock();
+	}
+
+	nSystemClockCounter++;
 }
