@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Arquivos de Origem">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Arquivos de Recurso">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\CPU">
+      <UniqueIdentifier>{8a105d22-3163-4f50-81b6-208adfa713de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\PPU">
+      <UniqueIdentifier>{a3a5e426-55ef-4de4-b288-a8abc524c586}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Origem\CPU">
+      <UniqueIdentifier>{3acbc958-f342-4299-a522-69f9451f021e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Origem\PPU">
+      <UniqueIdentifier>{2004b5cf-347f-4ab1-840e-6bc166902983}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Bus.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="olc6502.h">
+      <Filter>Arquivos de Cabeçalho\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="olc2C02.h">
+      <Filter>Arquivos de Cabeçalho\PPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Cartridge.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Bus.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="olc2C02.cpp">
+      <Filter>Arquivos de Origem\PPU</Filter>
+    </ClCompile>
+    <ClCompile Include="olc6502.cpp">
+      <Filter>Arquivos de Origem\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Cartridge.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
