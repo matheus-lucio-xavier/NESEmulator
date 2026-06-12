@@ -1,8 +1,5 @@
 #pragma once
 
-// With little modification, reliance upon the stdlib can
-// be removed entirely if required.
-
 // Ths is required for translation table and disassembler. The table
 // could be implemented straight up as an array, but I used a vector.
 #include <vector>
@@ -12,24 +9,11 @@
 #include <string>
 #include <map>
 
-// Emulation Behaviour Logging ======================================
-// Uncomment this to create a logfile entry for each clock tick of 
-// the CPU. Beware: this slows down emulation considerably and
-// generates extremely large files. I recommend "glogg" to view the
-// data as it is designed to handle enormous files.
-//
-//#define LOGMODE // <- Uncomment me to enable logging!
-
-#ifdef LOGMODE
-#include <stdio.h>
-#endif
-
 // Forward declaration of generic communications bus class to
 // prevent circular inclusions
 class Bus;
 
 
-// The 6502 Emulation Class. This is it!
 class olc6502
 {
 public:
@@ -100,22 +84,7 @@ private:
 	uint8_t read(uint16_t a);
 	void    write(uint16_t a, uint8_t d);
 
-	// The read location of data can come from two sources, a memory address, or
-	// its immediately available as part of the instruction. This function decides
-	// depending on address mode of instruction byte
 	uint8_t fetch();
-
-	// This structure and the following vector are used to compile and store
-	// the opcode translation table. The 6502 can effectively have 256
-	// different instructions. Each of these are stored in a table in numerical
-	// order so they can be looked up easily, with no decoding required.
-	// Each table entry holds:
-	//	Pneumonic : A textual representation of the instruction (used for disassembly)
-	//	Opcode Function: A function pointer to the implementation of the opcode
-	//	Opcode Address Mode : A function pointer to the implementation of the 
-	//						  addressing mechanism used by the instruction
-	//	Cycle Count : An integer that represents the base number of clock cycles the
-	//				  CPU requires to perform the instruction
 
 	struct INSTRUCTION
 	{
@@ -152,13 +121,5 @@ private:
 	uint8_t SEC();	uint8_t SED();	uint8_t SEI();	uint8_t STA();
 	uint8_t STX();	uint8_t STY();	uint8_t TAX();	uint8_t TAY();
 	uint8_t TSX();	uint8_t TXA();	uint8_t TXS();	uint8_t TYA();
-
-	// I capture all "unofficial" opcodes with this function. It is
-	// functionally identical to a NOP
 	uint8_t XXX();
-
-#ifdef LOGMODE
-private:
-	FILE* logfile = nullptr;
-#endif
 };

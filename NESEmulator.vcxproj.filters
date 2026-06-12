@@ -31,11 +31,11 @@
     <Filter Include="Arquivos de Origem\Cartridge">
       <UniqueIdentifier>{b6f0e7fa-2815-4ef6-848b-c3a0bd77cb51}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Arquivos de Cabeçalho\Mapper">
-      <UniqueIdentifier>{0e00fa77-fd36-4488-b255-ee2c6a1b1d8f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Arquivos de Origem\Mapper">
+    <Filter Include="Arquivos de Origem\Mappers">
       <UniqueIdentifier>{bcc9709f-927f-41ee-bd9e-2a414e9f3923}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\Mappers">
+      <UniqueIdentifier>{0e00fa77-fd36-4488-b255-ee2c6a1b1d8f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -55,10 +55,10 @@
       <Filter>Arquivos de Cabeçalho\Cartridge</Filter>
     </ClInclude>
     <ClInclude Include="Mapper.h">
-      <Filter>Arquivos de Cabeçalho\Mapper</Filter>
+      <Filter>Arquivos de Cabeçalho\Mappers</Filter>
     </ClInclude>
     <ClInclude Include="Mapper_000.h">
-      <Filter>Arquivos de Cabeçalho\Mapper</Filter>
+      <Filter>Arquivos de Cabeçalho\Mappers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -78,10 +78,10 @@
       <Filter>Arquivos de Origem\Cartridge</Filter>
     </ClCompile>
     <ClCompile Include="Mapper.cpp">
-      <Filter>Arquivos de Origem\Mapper</Filter>
+      <Filter>Arquivos de Origem\Mappers</Filter>
     </ClCompile>
     <ClCompile Include="Mapper_000.cpp">
-      <Filter>Arquivos de Origem\Mapper</Filter>
+      <Filter>Arquivos de Origem\Mappers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
