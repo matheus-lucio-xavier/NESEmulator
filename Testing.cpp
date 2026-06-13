@@ -105,7 +105,7 @@ private:
 	bool OnUserCreate()
 	{
 		// Load the cartridge
-		cart = std::make_shared<Cartridge>("roms/donkeyKong.nes");
+		cart = std::make_shared<Cartridge>("roms/nestest.nes");
 		if (!cart->ImageValid())
 			return false;
 
