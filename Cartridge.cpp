@@ -23,8 +23,6 @@ Cartridge::Cartridge(const std::string& sFileName) {
 
 	bImageValid = false;
 
-	std::cout << "Pasta atual: " << std::filesystem::current_path().string() << std::endl;
-
 	std::ifstream ifs;
 	ifs.open(sFileName, std::ifstream::binary);
 	if (ifs.is_open())
