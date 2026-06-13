@@ -109,11 +109,12 @@ olc::Sprite& olc2C02::GetPatternTable(uint8_t i, uint8_t palette)
 
             for (uint16_t row = 0; row < 8; row++) {
 
-                uint8_t tile_lsb = ppuRead(i + 0x1000 + nOffset + row + 0);
-                uint8_t tile_msb = ppuRead(i + 0x1000 + nOffset + row + 8);
+                uint8_t tile_lsb = ppuRead(i * 0x1000 + nOffset + row + 0);
+                uint8_t tile_msb = ppuRead(i * 0x1000 + nOffset + row + 8);
 
                 for (uint16_t col = 0; col < 8; col++) {
-                    uint8_t pixel = (tile_lsb & 0x01) + (tile_msb & 0x01);
+                    //uint8_t pixel = (tile_lsb & 0x01) + (tile_msb & 0x01);
+                    uint8_t pixel = ((tile_msb & 0x01) << 1) | (tile_lsb & 0x01);
                     tile_lsb >>= 1; tile_msb >>= 1;
 
                     sprPatternTable[i]->SetPixel(
@@ -144,6 +145,9 @@ uint8_t olc2C02::cpuRead(uint16_t addr, bool rdonly) {
 	case 0x0001: // Mask
 		break;
 	case 0x0002: // Status
+        data = (status.reg & 0xE0) | (ppu_data_buffer & 0x1F);
+        status.vertical_blank = 0;
+        address_latch = 0;
 		break;
 	case 0x0003: // OAM Address
 		break;
@@ -154,17 +158,24 @@ uint8_t olc2C02::cpuRead(uint16_t addr, bool rdonly) {
 	case 0x0006: // PPU Address
 		break;
 	case 0x0007: // PPU Data
+        data = ppu_data_buffer;
+        ppu_data_buffer = ppuRead(ppu_address);
+
+        if (ppu_address >= 0x3F00) data = ppu_data_buffer;
+        ppu_address += (control.increment_mode ? 32 : 1);
 		break;
 }
 
 	return data;
 }
-void    olc2C02::cpuWrite(uint16_t addr, uint8_t  data) {
+void olc2C02::cpuWrite(uint16_t addr, uint8_t  data) {
 	switch (addr)
 	{
 	case 0x0000: // Control
+        control.reg = data;
 		break;
 	case 0x0001: // Mask
+        mask.reg = data;
 		break;
 	case 0x0002: // Status
 		break;
@@ -175,8 +186,17 @@ void    olc2C02::cpuWrite(uint16_t addr, uint8_t  data) {
 	case 0x0005: // Scroll
 		break;
 	case 0x0006: // PPU Address
+        if (address_latch == 0) {
+            ppu_address = (ppu_address & 0x00FF) | (data << 8);
+            address_latch = 1;
+        } else {
+            ppu_address = (ppu_address & 0xFF00) | data;
+            address_latch = 0;
+        }
 		break;
 	case 0x0007: // PPU Data
+        ppuWrite(ppu_address, data);
+        ppu_address += (control.increment_mode ? 32 : 1);
 		break;
 	}
 }
@@ -193,7 +213,29 @@ uint8_t olc2C02::ppuRead(uint16_t addr, bool rdonly) {
         data = tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF];
     }
     else if (addr >= 0x2000 && addr <= 0x3EFF) {
-
+        addr &= 0x0FFF;
+        if (cart->mirror == Cartridge::MIRROR::VERTICAL) {
+            // Vertical
+            if (addr >= 0x0000 && addr <= 0x03FF)
+                data = tblName[0][addr & 0x03FF];
+            if (addr >= 0x0400 && addr <= 0x07FF)
+                data = tblName[1][addr & 0x03FF];
+            if (addr >= 0x0800 && addr <= 0x0BFF)
+                data = tblName[0][addr & 0x03FF];
+            if (addr >= 0x0C00 && addr <= 0x0FFF)
+                data = tblName[1][addr & 0x03FF];
+        }
+        else if (cart->mirror == Cartridge::MIRROR::HORIZONTAL) {
+            // Horizontal
+            if (addr >= 0x0000 && addr <= 0x03FF)
+                data = tblName[0][addr & 0x03FF];
+            if (addr >= 0x0400 && addr <= 0x07FF)
+                data = tblName[0][addr & 0x03FF];
+            if (addr >= 0x0800 && addr <= 0x0BFF)
+                data = tblName[1][addr & 0x03FF];
+            if (addr >= 0x0C00 && addr <= 0x0FFF)
+                data = tblName[1][addr & 0x03FF];
+        }
     }
     else if (addr >= 0x3F00 && addr <= 0x3FFF) {
         addr &= 0x001F;
@@ -216,7 +258,29 @@ void olc2C02::ppuWrite(uint16_t addr, uint8_t data) {
         tblPattern[(addr & 0x1000) >> 12][addr & 0x0FFF] = data;
     }
     else if (addr >= 0x2000 && addr <= 0x3EFF) {
-
+        addr &= 0x0FFF;
+        if (cart->mirror == Cartridge::MIRROR::VERTICAL) {
+            // Vertical
+            if (addr >= 0x0000 && addr <= 0x03FF)
+                tblName[0][addr & 0x03FF] = data;
+            if (addr >= 0x0400 && addr <= 0x07FF)
+                tblName[1][addr & 0x03FF] = data;
+            if (addr >= 0x0800 && addr <= 0x0BFF)
+                tblName[0][addr & 0x03FF] = data;
+            if (addr >= 0x0C00 && addr <= 0x0FFF)
+                tblName[1][addr & 0x03FF] = data;
+        }
+        else if (cart->mirror == Cartridge::MIRROR::HORIZONTAL) {
+            // Horizontal
+            if (addr >= 0x0000 && addr <= 0x03FF)
+                tblName[0][addr & 0x03FF] = data;
+            if (addr >= 0x0400 && addr <= 0x07FF)
+                tblName[0][addr & 0x03FF] = data;
+            if (addr >= 0x0800 && addr <= 0x0BFF)
+                tblName[1][addr & 0x03FF] = data;
+            if (addr >= 0x0C00 && addr <= 0x0FFF)
+                tblName[1][addr & 0x03FF] = data;
+        }
     }
     else if (addr >= 0x3F00 && addr <= 0x3FFF) {
         addr &= 0x001F;
@@ -234,7 +298,18 @@ void olc2C02::connectCartridge(const std::shared_ptr<Cartridge>& cartridge) {
 
 void olc2C02::clock() {
 
-	sprScreen->SetPixel(cycle - 1, scanline, palScreen[(rand() % 2) ? 0x3F : 0x30]);
+    if (scanline == -1 && cycle == 1) {
+        status.vertical_blank = 0;
+    }
+
+    if (scanline == 241 && cycle == 1) {
+        status.vertical_blank = 1;
+        if (control.enable_nmi) 
+            nmi = true;
+    }
+
+    // falso noise apenas para teste
+	// sprScreen->SetPixel(cycle - 1, scanline, palScreen[(rand() % 2) ? 0x3F : 0x30]);
 
 	cycle++;
 	if (cycle >= 341) {

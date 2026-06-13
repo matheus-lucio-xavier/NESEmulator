@@ -40,7 +40,7 @@ uint8_t Bus::cpuRead(uint16_t addr, bool bReadOnly)
 		data = cpuRam[addr & 0x07FF];
 	}
 	else if (addr >= 0x2000 && addr <= 0x3FFF) {
-		ppu.cpuRead(addr & 0x0007, bReadOnly);
+		data = ppu.cpuRead(addr & 0x0007, bReadOnly);
 	}
 
 	return data;
@@ -62,6 +62,11 @@ void Bus::clock() {
 	if (nSystemClockCounter % 3 == 0) {
 		cpu.clock();
 	}
+
+    if (ppu.nmi) {
+        ppu.nmi = false;
+        cpu.nmi();
+    }
 
 	nSystemClockCounter++;
 }

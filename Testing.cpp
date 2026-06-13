@@ -105,7 +105,7 @@ private:
 	bool OnUserCreate()
 	{
 		// Load the cartridge
-		cart = std::make_shared<Cartridge>("roms/nestest.nes");
+		cart = std::make_shared<Cartridge>("roms/donkeyKong.nes");
 		if (!cart->ImageValid())
 			return false;
 
@@ -123,8 +123,6 @@ private:
 	bool OnUserUpdate(float fElapsedTime)
 	{
 		Clear(olc::DARK_BLUE);
-
-
 
 		if (bEmulationRun)
 		{
@@ -185,6 +183,18 @@ private:
         DrawSprite(648, 348, &nes.ppu.GetPatternTable(1, nSelectedPalette));
 
 		DrawSprite(0, 0, &nes.ppu.GetScreen(), 2);
+
+        olc::Sprite& s = nes.ppu.GetPatternTable(1, nSelectedPalette);
+        for (uint8_t y = 0; y < 30; y++) {
+            for (uint8_t x = 0; x < 32; x++) {
+                // DrawString(x * 16, y * 16, hex((uint32_t)nes.ppu.tblName[0][y * 32 + x], 2));
+                uint8_t id = (uint32_t)nes.ppu.tblName[0][y * 32 + x];
+                DrawPartialSprite(x * 16, y * 16, &s, 
+                    (id & 0x0F) << 3, 
+                    ((id >> 4) & 0x0F) << 3, 
+                    8, 8, 2);
+            }
+        }
 		return true;
 	}
 };
