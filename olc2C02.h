@@ -85,9 +85,41 @@ private:
         uint8_t reg;
     } control;
 
+    union loopy_register
+    {
+        // Credit to Loopy for working this out
+        struct
+        {
+
+            uint16_t coarse_x : 5;
+            uint16_t coarse_y : 5;
+            uint16_t nametable_x : 1;
+            uint16_t nametable_y : 1;
+            uint16_t fine_y : 3;
+            uint16_t unused : 1;
+        };
+
+        uint16_t reg = 0x0000;
+    };
+
     uint8_t address_latch = 0x00;
     uint8_t ppu_data_buffer = 0x00;
-    uint16_t ppu_address = 0x0000;
+
+    loopy_register vram_addr;
+    loopy_register tram_addr;
+
+    uint8_t fine_x = 0x00;
+
+private:
+    // Background rendering
+    uint8_t bg_next_tile_id = 0x00;
+    uint8_t bg_next_tile_attrib = 0x00;
+    uint8_t bg_next_tile_lsb = 0x00;
+    uint8_t bg_next_tile_msb = 0x00;
+    uint16_t bg_shifter_pattern_lo = 0x0000;
+    uint16_t bg_shifter_pattern_hi = 0x0000;
+    uint16_t bg_shifter_attrib_lo = 0x0000;
+    uint16_t bg_shifter_attrib_hi = 0x0000;
 
 
 public:
