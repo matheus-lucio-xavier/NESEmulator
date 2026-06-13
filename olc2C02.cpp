@@ -138,33 +138,59 @@ olc::Pixel& olc2C02::GetColourFromPaletteRam(uint8_t palette, uint8_t pixel) {
 uint8_t olc2C02::cpuRead(uint16_t addr, bool rdonly) {
 	uint8_t data = 0x00;
 
-	switch (addr)
-	{
-	case 0x0000: // Control
-		break;
-	case 0x0001: // Mask
-		break;
-	case 0x0002: // Status
-        data = (status.reg & 0xE0) | (ppu_data_buffer & 0x1F);
-        status.vertical_blank = 0;
-        address_latch = 0;
-		break;
-	case 0x0003: // OAM Address
-		break;
-	case 0x0004: // OAM Data
-		break;
-	case 0x0005: // Scroll
-		break;
-	case 0x0006: // PPU Address
-		break;
-	case 0x0007: // PPU Data
-        data = ppu_data_buffer;
-        ppu_data_buffer = ppuRead(vram_addr.reg);
+    if (rdonly) {
+        switch (addr)
+        {
+        case 0x0000: // Control
+            data = control.reg;
+            break;
+        case 0x0001: // Mask
+            data = mask.reg;
+            break;
+        case 0x0002: // Status
+            data = status.reg;
+            break;
+        case 0x0003: // OAM Address
+            break;
+        case 0x0004: // OAM Data
+            break;
+        case 0x0005: // Scroll
+            break;
+        case 0x0006: // PPU Address
+            break;
+        case 0x0007: // PPU Data
+            break;
+        }
+    }
+    else {
+        switch (addr)
+        {
+        case 0x0000: // Control
+            break;
+        case 0x0001: // Mask
+            break;
+        case 0x0002: // Status
+            data = (status.reg & 0xE0) | (ppu_data_buffer & 0x1F);
+            status.vertical_blank = 0;
+            address_latch = 0;
+            break;
+        case 0x0003: // OAM Address
+            break;
+        case 0x0004: // OAM Data
+            break;
+        case 0x0005: // Scroll
+            break;
+        case 0x0006: // PPU Address
+            break;
+        case 0x0007: // PPU Data
+            data = ppu_data_buffer;
+            ppu_data_buffer = ppuRead(vram_addr.reg);
 
-        if (vram_addr.reg >= 0x3F00) data = ppu_data_buffer;
-        vram_addr.reg += (control.increment_mode ? 32 : 1);
-		break;
-}
+            if (vram_addr.reg >= 0x3F00) data = ppu_data_buffer;
+            vram_addr.reg += (control.increment_mode ? 32 : 1);
+            break;
+        }
+    }
 
 	return data;
 }
@@ -313,7 +339,7 @@ void olc2C02::connectCartridge(const std::shared_ptr<Cartridge>& cartridge) {
 
 void olc2C02::clock() {
     // ==============================================================================
-    // Increment the background tile "pointer" one tile/column horizontally
+    // Incrementa o background tile "pointer" 1 tile/column horizontalmente
     auto IncrementScrollX = [&]()
     {
         if (mask.render_background || mask.render_sprites)
@@ -331,7 +357,7 @@ void olc2C02::clock() {
     };
 
     // ==============================================================================
-    // Increment the background tile "pointer" one scanline vertically
+    // Incrementa o background tile "pointer" 1 scanline verticalmente
     auto IncrementScrollY = [&]()
     {
         if (mask.render_background || mask.render_sprites)
@@ -364,7 +390,7 @@ void olc2C02::clock() {
 
     auto TransferAddressX = [&]()
     {
-        // Ony if rendering is enabled
+        // Apenas se estiver em rendering
         if (mask.render_background || mask.render_sprites)
         {
             vram_addr.nametable_x = tram_addr.nametable_x;
@@ -374,7 +400,7 @@ void olc2C02::clock() {
 
     auto TransferAddressY = [&]()
     {
-        // Ony if rendering is enabled
+        // Apenas se estiver em rendering
         if (mask.render_background || mask.render_sprites)
         {
             vram_addr.fine_y = tram_addr.fine_y;
@@ -396,11 +422,11 @@ void olc2C02::clock() {
     {
         if (mask.render_background)
         {
-            // Shifting background tile pattern row
+            // Alternando background tile pattern row
             bg_shifter_pattern_lo <<= 1;
             bg_shifter_pattern_hi <<= 1;
     
-            // Shifting palette attributes by 1
+            // Alternando atributos da palette por 1
             bg_shifter_attrib_lo <<= 1;
             bg_shifter_attrib_hi <<= 1;
         }
@@ -457,10 +483,6 @@ void olc2C02::clock() {
         if (scanline == -1 && cycle >= 280 && cycle < 305) {
             TransferAddressY();
         }
-    }
-
-    if (scanline == 240) {
-        // fazer nada
     }
 
     if (scanline == 241 && cycle == 1) {
