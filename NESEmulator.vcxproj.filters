@@ -37,6 +37,12 @@
     <Filter Include="Arquivos de Cabeçalho\Mappers">
       <UniqueIdentifier>{0e00fa77-fd36-4488-b255-ee2c6a1b1d8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Arquivos de Origem\imgui">
+      <UniqueIdentifier>{637cfc54-be9b-441d-9473-1d3d9e468c9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\imgui">
+      <UniqueIdentifier>{2e2406ee-68b9-4af4-af0e-9c222f2f8e81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bus.h">
@@ -60,6 +66,30 @@
     <ClInclude Include="Mapper_000.h">
       <Filter>Arquivos de Cabeçalho\Mappers</Filter>
     </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>Arquivos de Cabeçalho\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>Arquivos de Cabeçalho\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>Arquivos de Cabeçalho\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_dx11.h">
+      <Filter>Arquivos de Cabeçalho\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>Arquivos de Cabeçalho\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>Arquivos de Cabeçalho\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>Arquivos de Cabeçalho\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\imgui-1.92.8\backends\imgui_impl_win32.h">
+      <Filter>Arquivos de Cabeçalho\imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bus.cpp">
@@ -82,6 +112,30 @@
     </ClCompile>
     <ClCompile Include="Mapper_000.cpp">
       <Filter>Arquivos de Origem\Mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_widgets.cpp">
+      <Filter>Arquivos de Origem\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_tables.cpp">
+      <Filter>Arquivos de Origem\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_demo.cpp">
+      <Filter>Arquivos de Origem\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_draw.cpp">
+      <Filter>Arquivos de Origem\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_dx11.cpp">
+      <Filter>Arquivos de Origem\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui.cpp">
+      <Filter>Arquivos de Origem\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Downloads\imgui-1.92.8\backends\imgui_impl_win32.cpp">
+      <Filter>Arquivos de Origem\imgui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
