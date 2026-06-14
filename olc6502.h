@@ -1,16 +1,12 @@
 #pragma once
 
-// Ths is required for translation table and disassembler. The table
-// could be implemented straight up as an array, but I used a vector.
+// Necessario translation table e disassembler
 #include <vector>
 
-// These are required for disassembler. If you dont require disassembly
-// then just remove the function.
+// Necessario com disassembler
 #include <string>
 #include <map>
 
-// Forward declaration of generic communications bus class to
-// prevent circular inclusions
 class Bus;
 
 
@@ -21,44 +17,31 @@ public:
 	~olc6502();
 
 public:
-	// CPU Core registers, exposed as public here for ease of access from external
-	// examinors. This is all the 6502 has.
-	uint8_t  a = 0x00;		// Accumulator Register
-	uint8_t  x = 0x00;		// X Register
-	uint8_t  y = 0x00;		// Y Register
-	uint8_t  stkp = 0x00;		// Stack Pointer (points to location on bus)
-	uint16_t pc = 0x0000;	// Program Counter
-	uint8_t  status = 0x00;		// Status Register
+	uint8_t  a = 0x00;		    // Accumulator Register
+	uint8_t  x = 0x00;		    // X Register
+	uint8_t  y = 0x00;		    // Y Register
+	uint8_t  stkp = 0x00;	    // Stack Pointer
+	uint16_t pc = 0x0000;	    // Program Counter
+	uint8_t  status = 0x00;	    // Status Register
 
-	// External event functions. In hardware these represent pins that are asserted
-	// to produce a change in state.
-	void reset();	// Reset Interrupt - Forces CPU into known state
-	void irq();		// Interrupt Request - Executes an instruction at a specific location
-	void nmi();		// Non-Maskable Interrupt Request - As above, but cannot be disabled
-	void clock();	// Perform one clock cycle's worth of update
+	void reset();	// Reset Interrupt
+	void irq();		// Interrupt Request
+	void nmi();		// Non-Maskable Interrupt Request
+	void clock();	// clock
 
-	// Indicates the current instruction has completed by returning true. This is
-	// a utility function to enable "step-by-step" execution, without manually 
-	// clocking every cycle
 	bool complete();
 
-	// Link this CPU to a communications bus
+	// Conecta a CPU com o bus
 	void ConnectBus(Bus* n) { bus = n; }
 
-	// Produces a map of strings, with keys equivalent to instruction start locations
-	// in memory, for the specified address range
 	std::map<uint16_t, std::string> disassemble(uint16_t nStart, uint16_t nStop);
 
-	// The status register stores 8 flags. Ive enumerated these here for ease
-	// of access. You can access the status register directly since its public.
-	// The bits have different interpretations depending upon the context and 
-	// instruction being executed.
 	enum FLAGS6502
 	{
 		C = (1 << 0),	// Carry Bit
 		Z = (1 << 1),	// Zero
 		I = (1 << 2),	// Disable Interrupts
-		D = (1 << 3),	// Decimal Mode (unused in this implementation)
+		D = (1 << 3),	// Decimal Mode (unused)
 		B = (1 << 4),	// Break
 		U = (1 << 5),	// Unused
 		V = (1 << 6),	// Overflow
@@ -66,20 +49,18 @@ public:
 	};
 
 private:
-	// Convenience functions to access status register
 	uint8_t GetFlag(FLAGS6502 f);
 	void    SetFlag(FLAGS6502 f, bool v);
 
-	// Assisstive variables to facilitate emulation
-	uint8_t  fetched = 0x00;   // Represents the working input value to the ALU
-	uint16_t temp = 0x0000; // A convenience variable used everywhere
-	uint16_t addr_abs = 0x0000; // All used memory addresses end up in here
-	uint16_t addr_rel = 0x00;   // Represents absolute address following a branch
-	uint8_t  opcode = 0x00;   // Is the instruction byte
-	uint8_t  cycles = 0;	   // Counts how many cycles the instruction has remaining
-	uint32_t clock_count = 0;	   // A global accumulation of the number of clocks
+	uint8_t  fetched = 0x00;    // Valor lido da memória para a ALU
+    uint16_t temp = 0x0000;     // Variavel temporaria
+	uint16_t addr_abs = 0x0000; // Endereço absoluto calculado
+	uint16_t addr_rel = 0x00;   // Deslocamento usado em branches
+	uint8_t  opcode = 0x00;     // Codigo da instrução atual
+	uint8_t  cycles = 0;	    // Ciclos restantes da instrução
+	uint32_t clock_count = 0;	// Total de clocks executados
 
-	// Linkage to the communications bus
+    // comunicacao com o bus
 	Bus* bus = nullptr;
 	uint8_t read(uint16_t a);
 	void    write(uint16_t a, uint8_t d);
