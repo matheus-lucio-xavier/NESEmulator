@@ -140,5 +140,28 @@ public: // interface
 	void clock();
 
     bool nmi = false;
+
+private: 
+    struct sObjectAttributeEntry
+    {
+        uint8_t y;			// Y position
+        uint8_t id;			// ID of tile from pattern memory
+        uint8_t attribute;	// Flags define how sprite should be rendered
+        uint8_t x;			// X position
+    } OAM[64];
+
+    uint8_t oam_addr = 0x00;
+
+    sObjectAttributeEntry spriteScanline[8];
+    uint8_t sprite_count;
+    uint8_t sprite_shifter_pattern_lo[8];
+    uint8_t sprite_shifter_pattern_hi[8];
+
+    // Sprite Zero Collision Flags
+    bool bSpriteZeroHitPossible = false;
+    bool bSpriteZeroBeingRendered = false;
+
+public:
+    uint8_t* pOAM = (uint8_t*)OAM;
 };
 

@@ -124,6 +124,17 @@ private:
 	{
 		Clear(olc::DARK_BLUE);
 
+        // Handle input for controller in port #1
+        nes.controller[0] =
+            (GetKey(olc::Key::K).bHeld ? 0x80 : 0x00) |     // A
+            (GetKey(olc::Key::L).bHeld ? 0x40 : 0x00) |     // B
+            (GetKey(olc::Key::BACK).bHeld ? 0x20 : 0x00) | // Select
+            (GetKey(olc::Key::ENTER).bHeld ? 0x10 : 0x00) |  // Start
+            (GetKey(olc::Key::W).bHeld ? 0x08 : 0x00) |     // Up
+            (GetKey(olc::Key::S).bHeld ? 0x04 : 0x00) |     // Down
+            (GetKey(olc::Key::A).bHeld ? 0x02 : 0x00) |     // Left
+            (GetKey(olc::Key::D).bHeld ? 0x01 : 0x00);      //Rigth
+
 		if (bEmulationRun)
 		{
 			if (fResidualTime > 0.0f)
@@ -167,7 +178,17 @@ private:
         if (GetKey(olc::Key::P).bPressed) (++nSelectedPalette) &= 0x07;
 
 		DrawCpu(516, 2);
-		DrawCode(516, 72, 26);
+
+		// DrawCode(516, 72, 26);
+        // Draw OAM Contents (first 26 out of 64) ======================================
+        for (int i = 0; i < 26; i++)
+        {
+            std::string s = hex(i, 2) + ": (" + std::to_string(nes.ppu.pOAM[i * 4 + 3])
+                + ", " + std::to_string(nes.ppu.pOAM[i * 4 + 0]) + ") "
+                + "ID: " + hex(nes.ppu.pOAM[i * 4 + 1], 2) +
+                +" AT: " + hex(nes.ppu.pOAM[i * 4 + 2], 2);
+            DrawString(516, 72 + i * 10, s);
+        }
 
         // Draw Palettes & Pattern Tables ==============================================
         const int nSwatchSize = 6;

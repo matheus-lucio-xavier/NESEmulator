@@ -26,7 +26,15 @@ void Bus::cpuWrite(uint16_t addr, uint8_t data)
 	}
 	else if(addr >= 0x2000 && addr <= 0x3FFF){
 		ppu.cpuWrite(addr & 0x0007, data);
-	}
+    }
+    else if (addr == 0x4014) {
+        dma_page = data;
+        dma_addr = 0x00;
+        dma_tansfer = true;
+    }
+    else if(addr >= 0x4016 && addr <= 0x4017) {
+        controller_state[addr & 0x0001] = controller[addr & 0x0001];
+    }
 }
 
 uint8_t Bus::cpuRead(uint16_t addr, bool bReadOnly)
@@ -42,6 +50,10 @@ uint8_t Bus::cpuRead(uint16_t addr, bool bReadOnly)
 	else if (addr >= 0x2000 && addr <= 0x3FFF) {
 		data = ppu.cpuRead(addr & 0x0007, bReadOnly);
 	}
+    else if (addr >= 0x4016 && addr <= 0x4017) {
+        data = (controller_state[addr & 0x0001] & 0x80) > 0;
+        controller_state[addr & 0x0001] <<= 1;
+    }
 
 	return data;
 }
@@ -57,10 +69,32 @@ void Bus::reset() {
 void Bus::clock() {
 	ppu.clock();
 
-	// a cpu roda 3 vezes mais lento que a ppu entao a funcao clock()
-	// so executa a cada 3 vezes que essa funcao e chamada.
 	if (nSystemClockCounter % 3 == 0) {
-		cpu.clock();
+        if (dma_tansfer) {
+            if (dma_dummy) {
+                if (nSystemClockCounter % 2 == 1) {
+                    dma_dummy = false;
+                }
+            }
+            else {
+                if (nSystemClockCounter % 2 == 0) {
+                    dma_data = cpuRead(dma_page << 8 | dma_addr);
+                }
+                else {
+                    ppu.pOAM[dma_addr] = dma_data;
+                    dma_addr++;
+
+                    if (dma_addr == 0x00) {
+                        dma_tansfer = false;
+                        dma_dummy = true;
+                    }
+                }
+            }
+        }
+        else {
+            cpu.clock();
+        }
+		
 	}
 
     if (ppu.nmi) {

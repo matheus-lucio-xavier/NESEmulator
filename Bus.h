@@ -23,6 +23,8 @@ public: // Devices on bus
 
 	std::shared_ptr<Cartridge> cart;
 
+    uint8_t controller[2];
+
 
 public: // Bus ler e escrever
 	void cpuWrite(uint16_t addr, uint8_t data);
@@ -36,4 +38,12 @@ public: // interface do sistema
 private:
 	// conta quantos clocks ja passaram
 	uint32_t nSystemClockCounter = 0;
+    uint8_t controller_state[2];
+
+    uint8_t dma_page = 0x00;
+    uint8_t dma_addr = 0x00;
+    uint8_t dma_data = 0x00;
+
+    bool dma_tansfer = false;
+    bool dma_dummy = false;
 };
