@@ -43,6 +43,12 @@
     <Filter Include="Arquivos de Cabeçalho\imgui">
       <UniqueIdentifier>{2e2406ee-68b9-4af4-af0e-9c222f2f8e81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Arquivos de Origem\APU">
+      <UniqueIdentifier>{8cb5f3f6-5041-443f-a176-609507e44085}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Arquivos de Cabeçalho\APU">
+      <UniqueIdentifier>{ffbab823-acaa-4ead-86ba-b3ba94afb01c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bus.h">
@@ -87,6 +93,9 @@
     <ClInclude Include="..\..\..\..\Downloads\imgui-1.92.8\backends\imgui_impl_win32.h">
       <Filter>Arquivos de Cabeçalho\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="olc2A03.h">
+      <Filter>Arquivos de Cabeçalho\APU</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bus.cpp">
@@ -130,6 +139,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\Downloads\imgui-1.92.8\backends\imgui_impl_win32.cpp">
       <Filter>Arquivos de Origem\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="olc2A03.cpp">
+      <Filter>Arquivos de Origem\APU</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

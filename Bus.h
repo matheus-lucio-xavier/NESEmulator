@@ -5,6 +5,7 @@
 
 #include "olc6502.h"
 #include "olc2C02.h"
+#include "olc2A03.h"
 #include "Cartridge.h"
 
 class Bus
@@ -18,6 +19,8 @@ public: // Devices on bus
 
 	olc2C02 ppu;
 
+    olc2A03 apu;
+
 	// falsa ram temporaria
 	std::array<uint8_t, 2048> cpuRam;
 
@@ -30,10 +33,19 @@ public: // Bus ler e escrever
 	void cpuWrite(uint16_t addr, uint8_t data);
 	uint8_t cpuRead(uint16_t addr, bool bReadOnly = false);
 
+public:
+    void SetSampleFrequency(uint32_t sample_rate);
+    double dAudioSample = 0.0;
+
+private:
+    double dAudioTime = 0.0;
+    double dAudioTimePerNESClock = 0.0;
+    double dAudioTimePerSystemSample = 0.0f;
+
 public: // interface do sistema
 	void insertCartridge(const std::shared_ptr<Cartridge>& cartridge);
 	void reset();
-	void clock();
+	bool clock();
 
 private:
 	// conta quantos clocks ja passaram

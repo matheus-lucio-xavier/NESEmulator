@@ -3,6 +3,14 @@
 #include <commdlg.h>
 #include <d3d11.h>
 #include <tchar.h>
+#include <algorithm>
+#include <fstream>
+#include <vector>
+#include <cstdint>
+#include <xaudio2.h>
+
+#pragma comment(lib, "xaudio2.lib")
+#pragma comment(lib, "winmm.lib")
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -10,6 +18,12 @@
 #include "Bus.h"
 #include "olc6502.h"
 #include "Cartridge.h"
+
+// Constantes de áudio
+#define SAMPLE_RATE     44100
+#define BUFFER_SIZE     1470     // 2 frames de áudio por buffer
+#define BUFFER_COUNT    4        // fila maior = menos starvation
+#define RING_SIZE 8192  // potência de 2, maior que 1 frame
 
 // Data
 static ID3D11Device* g_pd3dDevice = nullptr;
@@ -19,7 +33,42 @@ static bool g_SwapChainOccluded = false;
 static UINT g_ResizeWidth = 0, g_ResizeHeight = 0;
 static ID3D11RenderTargetView* g_mainRenderTargetView = nullptr;
 
+// Variáveis globais de áudio
+IXAudio2* g_pXAudio2 = nullptr;
+IXAudio2MasteringVoice* g_pMasterVoice = nullptr;
+IXAudio2SourceVoice* g_pSourceVoice = nullptr;
+
+int16_t g_audioBuffers[BUFFER_COUNT][BUFFER_SIZE];
+int     g_currentBuffer = 0;
+int     g_bufferPos = 0;
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+std::atomic<int> g_ringWrite{ 0 };
+std::atomic<int> g_ringRead{ 0 };
+int16_t g_ringBuffer[RING_SIZE];
+
+void RingPush(int16_t sample)
+{
+    int w = g_ringWrite.load(std::memory_order_relaxed);
+    int next = (w + 1) & (RING_SIZE - 1);
+    if (next != g_ringRead.load(std::memory_order_acquire))
+    {
+        g_ringBuffer[w] = sample;
+        g_ringWrite.store(next, std::memory_order_release);
+    }
+    // Se cheio, descarta — melhor que bloquear
+}
+
+bool RingPop(int16_t& sample)
+{
+    int r = g_ringRead.load(std::memory_order_relaxed);
+    if (r == g_ringWrite.load(std::memory_order_acquire))
+        return false; // vazio
+    sample = g_ringBuffer[r];
+    g_ringRead.store((r + 1) & (RING_SIZE - 1), std::memory_order_release);
+    return true;
+}
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -174,9 +223,46 @@ void UpdateTexture(const uint32_t* framebuffer)
     }
 }
 
+class AudioCallback : public IXAudio2VoiceCallback
+{
+public:
+    IXAudio2SourceVoice* pVoice = nullptr;
+
+    // Chamado pela thread de áudio do XAudio2 quando precisa de mais dados
+    void STDMETHODCALLTYPE OnBufferEnd(void*) override
+    {
+        // Preenche buffer com samples do ring buffer
+        for (int i = 0; i < BUFFER_SIZE; i++)
+        {
+            int16_t s = 0;
+            RingPop(s); // Se vazio retorna 0 (silêncio)
+            g_audioBuffers[g_currentBuffer][i] = s;
+        }
+
+        XAUDIO2_BUFFER buf = {};
+        buf.AudioBytes = BUFFER_SIZE * sizeof(int16_t);
+        buf.pAudioData = (BYTE*)g_audioBuffers[g_currentBuffer];
+        pVoice->SubmitSourceBuffer(&buf);
+
+        g_currentBuffer = (g_currentBuffer + 1) % BUFFER_COUNT;
+    }
+
+    // Métodos obrigatórios da interface — podem ficar vazios
+    void STDMETHODCALLTYPE OnStreamEnd() override {}
+    void STDMETHODCALLTYPE OnVoiceProcessingPassEnd() override {}
+    void STDMETHODCALLTYPE OnVoiceProcessingPassStart(UINT32) override {}
+    void STDMETHODCALLTYPE OnBufferStart(void*) override {}
+    void STDMETHODCALLTYPE OnLoopEnd(void*) override {}
+    void STDMETHODCALLTYPE OnVoiceError(void*, HRESULT) override {}
+};
+
+AudioCallback g_audioCallback;
+
 // Main code
 int main(int, char**)
 {
+
+    timeBeginPeriod(1);
     // Make process DPI aware and obtain main monitor scale
     ImGui_ImplWin32_EnableDpiAwareness();
     float main_scale = ImGui_ImplWin32_GetDpiScaleForMonitor(::MonitorFromPoint(POINT{ 0, 0 }, MONITOR_DEFAULTTOPRIMARY));
@@ -184,7 +270,7 @@ int main(int, char**)
     // Create application window
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_OVERLAPPEDWINDOW, 100, 100, (int)(1280 * main_scale), (int)(800 * main_scale), nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"NESEmulator", WS_OVERLAPPEDWINDOW, 100, 100, (int)(1280 * main_scale), (int)(800 * main_scale), nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -219,18 +305,59 @@ int main(int, char**)
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
+    CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    XAudio2Create(&g_pXAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+    g_pXAudio2->CreateMasteringVoice(&g_pMasterVoice);
+
+    WAVEFORMATEX wfx = {};
+    wfx.wFormatTag = WAVE_FORMAT_PCM;
+    wfx.nChannels = 1;
+    wfx.nSamplesPerSec = SAMPLE_RATE;
+    wfx.wBitsPerSample = 16;
+    wfx.nBlockAlign = wfx.nChannels * wfx.wBitsPerSample / 8;
+    wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
+
+    g_pXAudio2->CreateSourceVoice(&g_pSourceVoice, &wfx, 0,
+        XAUDIO2_DEFAULT_FREQ_RATIO, &g_audioCallback);
+    g_audioCallback.pVoice = g_pSourceVoice;
+
+    // Pré-enfileira 2 buffers vazios para o XAudio2 começar
+    memset(g_audioBuffers, 0, sizeof(g_audioBuffers));
+    for (int i = 0; i < 2; i++)
+    {
+        XAUDIO2_BUFFER buf = {};
+        buf.AudioBytes = BUFFER_SIZE * sizeof(int16_t);
+        buf.pAudioData = (BYTE*)g_audioBuffers[i];
+        g_pSourceVoice->SubmitSourceBuffer(&buf);
+    }
+    g_currentBuffer = 0;
+    g_pSourceVoice->Start(0);
+
     ImVec4 clear_color = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
 
     // Emulator setup
     Bus nes;
     std::shared_ptr<Cartridge> cart;
+
+    double cpuCyclesPerSample = 1789773.0 / SAMPLE_RATE;
+    double cycleAccumulator = 0.0;
     
 
     // Main loop
     bool done = false;
     bool full_screen = false;
 
-    static int scale = 3.0f;
+    static int scale = 3;
+    static int scaleIndex = 2;
+    const char* scales[] =
+    {
+        "1x (256x240)",
+        "2x (512x480)",
+        "3x (768x720)",
+        "4x (1024x960)",
+        "5x (1280x1200)"
+    };
+
     ImVec2 nes_window = ImVec2(256 * scale, 240 * scale);
 
     static std::string selectedRom;
@@ -303,7 +430,6 @@ int main(int, char**)
                     if (cart->ImageValid()) {
                         // Insert into NES
                         nes.insertCartridge(cart);
-                        nes_window = ImVec2(256 * scale, 240 * scale);
 
                         // Reset NES
                         nes.reset();
@@ -312,14 +438,14 @@ int main(int, char**)
                     }
                 }
             }
+            ImGui::SetCursorPos(ImVec2(100, 10));
 
-            ImGui::SliderInt(
-                "Zoom",
-                &scale,
-                1,
-                8,
-                "%dx"
-            );
+            ImGui::SetNextItemWidth(120.0f);
+
+            if (ImGui::Combo("Escala", &scaleIndex, scales, IM_ARRAYSIZE(scales))) {
+                scale = scaleIndex + 1;
+                nes_window = ImVec2(256 * scale, 240 * scale);
+            };
 
             ImGui::Separator();
 
@@ -345,11 +471,25 @@ int main(int, char**)
                 full_screen = false;
                 g_pSwapChain->SetFullscreenState(full_screen, nullptr);
                 state = AppState::Launcher;
-                nes.reset();
+                nes.reset();                
             }
 
-            do { nes.clock(); } while (!nes.ppu.frame_complete);
-            if (nes.ppu.frame_complete) {
+            // While de clock():
+            while (!nes.ppu.frame_complete)
+            {
+                nes.clock();
+                cycleAccumulator++;
+
+                if (cycleAccumulator >= cpuCyclesPerSample)
+                {
+                    cycleAccumulator -= cpuCyclesPerSample;
+                    float raw = (float)nes.apu.GetOutputSample();
+                    RingPush((int16_t)(raw * 32767.0f));
+                }
+            }
+
+            if (nes.ppu.frame_complete)
+            {
                 UpdateTexture(nes.ppu.GetFrameBuffer());
                 nes.ppu.frame_complete = false;
             }
@@ -396,6 +536,12 @@ int main(int, char**)
         g_SwapChainOccluded = (hr == DXGI_STATUS_OCCLUDED);
     }
 
+    g_pSourceVoice->Stop(0);
+    g_pSourceVoice->DestroyVoice();
+    g_pMasterVoice->DestroyVoice();
+    g_pXAudio2->Release();
+    CoUninitialize();
+
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -404,5 +550,6 @@ int main(int, char**)
     ::DestroyWindow(hwnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 
+    timeEndPeriod(1);
     return 0;
 }
