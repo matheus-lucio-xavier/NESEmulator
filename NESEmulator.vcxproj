@@ -142,7 +142,6 @@
     <ClInclude Include="Mapper_000.h" />
     <ClInclude Include="olc2C02.h" />
     <ClInclude Include="olc6502.h" />
-    <ClInclude Include="olcPixelGameEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Downloads\imgui-1.92.8\backends\imgui_impl_win32.cpp" />
@@ -159,7 +158,6 @@
     <ClCompile Include="Mapper_000.cpp" />
     <ClCompile Include="olc2C02.cpp" />
     <ClCompile Include="olc6502.cpp" />
-    <ClCompile Include="Testing.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

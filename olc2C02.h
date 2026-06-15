@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "Cartridge.h"
-#include "olcPixelGameEngine.h"
 
 class olc2C02
 {
@@ -18,18 +17,22 @@ public:
 	uint8_t tblPattern[2][4096];
 
 private:
-	olc::Pixel  palScreen[0x40];
-	olc::Sprite* sprScreen;
-	olc::Sprite* sprNameTable[2];
-	olc::Sprite* sprPatternTable[2];
+    struct Pixel
+    {
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        uint8_t a;
+    };
+
+	Pixel  palScreen[0x40];
+    uint32_t frameBuffer[256 * 240];
 
 public:
 	// Debugging Utilities
-	olc::Sprite& GetScreen();
-	olc::Sprite& GetNameTable(uint8_t i);
-	olc::Sprite& GetPatternTable(uint8_t i, uint8_t palette);
+    const uint32_t* GetFrameBuffer() const;
 
-    olc::Pixel& GetColourFromPaletteRam(uint8_t palette, uint8_t pixel);
+    const Pixel& GetColourFromPaletteRam(uint8_t palette, uint8_t pixel);
 
 	bool frame_complete = false;
 

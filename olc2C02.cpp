@@ -5,130 +5,85 @@
 
 olc2C02::olc2C02()
 {
-	palScreen[0x00] = olc::Pixel(84, 84, 84);
-	palScreen[0x01] = olc::Pixel(0, 30, 116);
-	palScreen[0x02] = olc::Pixel(8, 16, 144);
-	palScreen[0x03] = olc::Pixel(48, 0, 136);
-	palScreen[0x04] = olc::Pixel(68, 0, 100);
-	palScreen[0x05] = olc::Pixel(92, 0, 48);
-	palScreen[0x06] = olc::Pixel(84, 4, 0);
-	palScreen[0x07] = olc::Pixel(60, 24, 0);
-	palScreen[0x08] = olc::Pixel(32, 42, 0);
-	palScreen[0x09] = olc::Pixel(8, 58, 0);
-	palScreen[0x0A] = olc::Pixel(0, 64, 0);
-	palScreen[0x0B] = olc::Pixel(0, 60, 0);
-	palScreen[0x0C] = olc::Pixel(0, 50, 60);
-	palScreen[0x0D] = olc::Pixel(0, 0, 0);
-	palScreen[0x0E] = olc::Pixel(0, 0, 0);
-	palScreen[0x0F] = olc::Pixel(0, 0, 0);
+    palScreen[0x00] = { 84, 84, 84, 255 };
+    palScreen[0x01] = { 0, 30, 116, 255 };
+    palScreen[0x02] = { 8, 16, 144, 255 };
+    palScreen[0x03] = { 48, 0, 136, 255 };
+    palScreen[0x04] = { 68, 0, 100, 255 };
+    palScreen[0x05] = { 92, 0, 48, 255 };
+    palScreen[0x06] = { 84, 4, 0, 255 };
+    palScreen[0x07] = { 60, 24, 0, 255 };
+    palScreen[0x08] = { 32, 42, 0, 255 };
+    palScreen[0x09] = { 8, 58, 0, 255 };
+    palScreen[0x0A] = { 0, 64, 0, 255 };
+    palScreen[0x0B] = { 0, 60, 0, 255 };
+    palScreen[0x0C] = { 0, 50, 60, 255 };
+    palScreen[0x0D] = { 0, 0, 0, 255 };
+    palScreen[0x0E] = { 0, 0, 0, 255 };
+    palScreen[0x0F] = { 0, 0, 0, 255 };
 
-	palScreen[0x10] = olc::Pixel(152, 150, 152);
-	palScreen[0x11] = olc::Pixel(8, 76, 196);
-	palScreen[0x12] = olc::Pixel(48, 50, 236);
-	palScreen[0x13] = olc::Pixel(92, 30, 228);
-	palScreen[0x14] = olc::Pixel(136, 20, 176);
-	palScreen[0x15] = olc::Pixel(160, 20, 100);
-	palScreen[0x16] = olc::Pixel(152, 34, 32);
-	palScreen[0x17] = olc::Pixel(120, 60, 0);
-	palScreen[0x18] = olc::Pixel(84, 90, 0);
-	palScreen[0x19] = olc::Pixel(40, 114, 0);
-	palScreen[0x1A] = olc::Pixel(8, 124, 0);
-	palScreen[0x1B] = olc::Pixel(0, 118, 40);
-	palScreen[0x1C] = olc::Pixel(0, 102, 120);
-	palScreen[0x1D] = olc::Pixel(0, 0, 0);
-	palScreen[0x1E] = olc::Pixel(0, 0, 0);
-	palScreen[0x1F] = olc::Pixel(0, 0, 0);
+    palScreen[0x10] = { 152, 150, 152, 255 };
+    palScreen[0x11] = { 8, 76, 196, 255 };
+    palScreen[0x12] = { 48, 50, 236, 255 };
+    palScreen[0x13] = { 92, 30, 228, 255 };
+    palScreen[0x14] = { 136, 20, 176, 255 };
+    palScreen[0x15] = { 160, 20, 100, 255 };
+    palScreen[0x16] = { 152, 34, 32, 255 };
+    palScreen[0x17] = { 120, 60, 0, 255 };
+    palScreen[0x18] = { 84, 90, 0, 255 };
+    palScreen[0x19] = { 40, 114, 0, 255 };
+    palScreen[0x1A] = { 8, 124, 0, 255 };
+    palScreen[0x1B] = { 0, 118, 40, 255 };
+    palScreen[0x1C] = { 0, 102, 120, 255 };
+    palScreen[0x1D] = { 0, 0, 0, 255 };
+    palScreen[0x1E] = { 0, 0, 0, 255 };
+    palScreen[0x1F] = { 0, 0, 0, 255 };
 
-	palScreen[0x20] = olc::Pixel(236, 238, 236);
-	palScreen[0x21] = olc::Pixel(76, 154, 236);
-	palScreen[0x22] = olc::Pixel(120, 124, 236);
-	palScreen[0x23] = olc::Pixel(176, 98, 236);
-	palScreen[0x24] = olc::Pixel(228, 84, 236);
-	palScreen[0x25] = olc::Pixel(236, 88, 180);
-	palScreen[0x26] = olc::Pixel(236, 106, 100);
-	palScreen[0x27] = olc::Pixel(212, 136, 32);
-	palScreen[0x28] = olc::Pixel(160, 170, 0);
-	palScreen[0x29] = olc::Pixel(116, 196, 0);
-	palScreen[0x2A] = olc::Pixel(76, 208, 32);
-	palScreen[0x2B] = olc::Pixel(56, 204, 108);
-	palScreen[0x2C] = olc::Pixel(56, 180, 204);
-	palScreen[0x2D] = olc::Pixel(60, 60, 60);
-	palScreen[0x2E] = olc::Pixel(0, 0, 0);
-	palScreen[0x2F] = olc::Pixel(0, 0, 0);
+    palScreen[0x20] = { 236, 238, 236, 255 };
+    palScreen[0x21] = { 76, 154, 236, 255 };
+    palScreen[0x22] = { 120, 124, 236, 255 };
+    palScreen[0x23] = { 176, 98, 236, 255 };
+    palScreen[0x24] = { 228, 84, 236, 255 };
+    palScreen[0x25] = { 236, 88, 180, 255 };
+    palScreen[0x26] = { 236, 106, 100, 255 };
+    palScreen[0x27] = { 212, 136, 32, 255 };
+    palScreen[0x28] = { 160, 170, 0, 255 };
+    palScreen[0x29] = { 116, 196, 0, 255 };
+    palScreen[0x2A] = { 76, 208, 32, 255 };
+    palScreen[0x2B] = { 56, 204, 108, 255 };
+    palScreen[0x2C] = { 56, 180, 204, 255 };
+    palScreen[0x2D] = { 60, 60, 60, 255 };
+    palScreen[0x2E] = { 0, 0, 0, 255 };
+    palScreen[0x2F] = { 0, 0, 0, 255 };
 
-	palScreen[0x30] = olc::Pixel(236, 238, 236);
-	palScreen[0x31] = olc::Pixel(168, 204, 236);
-	palScreen[0x32] = olc::Pixel(188, 188, 236);
-	palScreen[0x33] = olc::Pixel(212, 178, 236);
-	palScreen[0x34] = olc::Pixel(236, 174, 236);
-	palScreen[0x35] = olc::Pixel(236, 174, 212);
-	palScreen[0x36] = olc::Pixel(236, 180, 176);
-	palScreen[0x37] = olc::Pixel(228, 196, 144);
-	palScreen[0x38] = olc::Pixel(204, 210, 120);
-	palScreen[0x39] = olc::Pixel(180, 222, 120);
-	palScreen[0x3A] = olc::Pixel(168, 226, 144);
-	palScreen[0x3B] = olc::Pixel(152, 226, 180);
-	palScreen[0x3C] = olc::Pixel(160, 214, 228);
-	palScreen[0x3D] = olc::Pixel(160, 162, 160);
-	palScreen[0x3E] = olc::Pixel(0, 0, 0);
-	palScreen[0x3F] = olc::Pixel(0, 0, 0);
-
-	sprScreen = new olc::Sprite(256, 240);
-	sprNameTable[0] = new olc::Sprite(256, 240);
-	sprNameTable[1] = new olc::Sprite(256, 240);
-	sprPatternTable[0] = new olc::Sprite(128, 128);
-	sprPatternTable[1] = new olc::Sprite(128, 128);
+    palScreen[0x30] = { 236, 238, 236, 255 };
+    palScreen[0x31] = { 168, 204, 236, 255 };
+    palScreen[0x32] = { 188, 188, 236, 255 };
+    palScreen[0x33] = { 212, 178, 236, 255 };
+    palScreen[0x34] = { 236, 174, 236, 255 };
+    palScreen[0x35] = { 236, 174, 212, 255 };
+    palScreen[0x36] = { 236, 180, 176, 255 };
+    palScreen[0x37] = { 228, 196, 144, 255 };
+    palScreen[0x38] = { 204, 210, 120, 255 };
+    palScreen[0x39] = { 180, 222, 120, 255 };
+    palScreen[0x3A] = { 168, 226, 144, 255 };
+    palScreen[0x3B] = { 152, 226, 180, 255 };
+    palScreen[0x3C] = { 160, 214, 228, 255 };
+    palScreen[0x3D] = { 160, 162, 160, 255 };
+    palScreen[0x3E] = { 0, 0, 0, 255 };
+    palScreen[0x3F] = { 0, 0, 0, 255 };
 }
 
 
-olc2C02::~olc2C02()
+olc2C02::~olc2C02() {
+}
+
+const uint32_t* olc2C02::GetFrameBuffer() const
 {
-	delete sprScreen;
-	delete sprNameTable[0];
-	delete sprNameTable[1];
-	delete sprPatternTable[0];
-	delete sprPatternTable[1];
+    return frameBuffer;
 }
 
-olc::Sprite& olc2C02::GetScreen()
-{
-	return *sprScreen;
-}
-
-olc::Sprite& olc2C02::GetNameTable(uint8_t i)
-{
-	return *sprNameTable[i];
-}
-
-olc::Sprite& olc2C02::GetPatternTable(uint8_t i, uint8_t palette)
-{
-    for (uint16_t nTileY = 0; nTileY < 16; nTileY++) {
-        for (uint16_t nTileX = 0; nTileX < 16; nTileX++) {
-
-            uint16_t nOffset = nTileY * 256 + nTileX * 16;
-
-            for (uint16_t row = 0; row < 8; row++) {
-
-                uint8_t tile_lsb = ppuRead(i * 0x1000 + nOffset + row + 0);
-                uint8_t tile_msb = ppuRead(i * 0x1000 + nOffset + row + 8);
-
-                for (uint16_t col = 0; col < 8; col++) {
-                    uint8_t pixel = ((tile_msb & 0x01) << 1) | (tile_lsb & 0x01);
-                    tile_lsb >>= 1; tile_msb >>= 1;
-
-                    sprPatternTable[i]->SetPixel(
-                        nTileX * 8 + (7 - col),
-                        nTileY * 8 + row,
-                        GetColourFromPaletteRam(palette, pixel)
-                    );
-                }
-            }
-        }
-    }
-	return *sprPatternTable[i];
-}
-
-olc::Pixel& olc2C02::GetColourFromPaletteRam(uint8_t palette, uint8_t pixel) {
+const olc2C02::Pixel& olc2C02::GetColourFromPaletteRam(uint8_t palette, uint8_t pixel) {
     return palScreen[ppuRead(0x3F00 + (palette << 2) + pixel) & 0x3F];
 }
 
@@ -742,7 +697,20 @@ void olc2C02::clock() {
         }
     }
 
-    sprScreen->SetPixel(cycle - 1, scanline, GetColourFromPaletteRam(palette, pixel));
+    Pixel p = GetColourFromPaletteRam(palette, pixel);
+
+    if (scanline >= 0 &&
+        scanline < 240 &&
+        cycle > 0 &&
+        cycle <= 256)
+    {
+        
+        frameBuffer[scanline * 256 + (cycle - 1)] =
+            p.r |
+            (p.g << 8) |
+            (p.b << 16) |
+            (255 << 24);
+    }
 
 	cycle++;
 	if (cycle >= 341) {

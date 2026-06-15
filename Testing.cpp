@@ -5,7 +5,6 @@
 #include "olc6502.h"
 
 #define OLC_PGE_APPLICATION
-#include "olcPixelGameEngine.h"
 #include "Cartridge.h"
 
 
@@ -21,7 +20,6 @@ private:
 	std::shared_ptr<Cartridge> cart;
 	bool bEmulationRun = true;
 	float fResidualTime = 0.0f;
-    uint8_t nSelectedPalette = 0x00;
 
 	bool OnUserCreate()
 	{
@@ -57,8 +55,6 @@ private:
         if (GetKey(olc::Key::SPACE).bPressed) bEmulationRun = !bEmulationRun;
         if (GetKey(olc::Key::R).bPressed) nes.reset();
 
-        sAppName = sAppName + (bEmulationRun ? "" : "paused");
-
 		if (bEmulationRun)
 		{
             sAppName = "olc2C02 Demonstration";
@@ -75,8 +71,6 @@ private:
         else {
             sAppName = "olc2C02 Demonstration paused";
         }
-
-		DrawSprite(0, 0, &nes.ppu.GetScreen(), 2);
 
 		return true;
 	}

@@ -7,13 +7,16 @@
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
+#include "Bus.h"
+#include "olc6502.h"
+#include "Cartridge.h"
 
 // Data
 static ID3D11Device* g_pd3dDevice = nullptr;
 static ID3D11DeviceContext* g_pd3dDeviceContext = nullptr;
 static IDXGISwapChain* g_pSwapChain = nullptr;
-static bool                     g_SwapChainOccluded = false;
-static UINT                     g_ResizeWidth = 0, g_ResizeHeight = 0;
+static bool g_SwapChainOccluded = false;
+static UINT g_ResizeWidth = 0, g_ResizeHeight = 0;
 static ID3D11RenderTargetView* g_mainRenderTargetView = nullptr;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -60,7 +63,6 @@ void CleanupRenderTarget()
 bool CreateDeviceD3D(HWND hWnd)
 {
     // Setup swap chain
-    // This is a basic setup. Optimally could use e.g. DXGI_SWAP_EFFECT_FLIP_DISCARD and handle fullscreen mode differently. See #8979 for suggestions.
     DXGI_SWAP_CHAIN_DESC sd;
     ZeroMemory(&sd, sizeof(sd));
     sd.BufferCount = 2;
@@ -115,6 +117,63 @@ std::string OpenFileDialog()
     return "";
 }
 
+ID3D11Texture2D* g_pScreenTexture = nullptr;
+ID3D11ShaderResourceView* g_pScreenSRV = nullptr;
+
+void CreateScreenTexture()
+{
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = 256;
+    desc.Height = 240;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DYNAMIC;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    g_pd3dDevice->CreateTexture2D(&desc, nullptr, &g_pScreenTexture);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = desc.Format;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+
+    g_pd3dDevice->CreateShaderResourceView(
+        g_pScreenTexture,
+        &srvDesc,
+        &g_pScreenSRV
+    );
+}
+
+void UpdateTexture(const uint32_t* framebuffer)
+{
+    D3D11_MAPPED_SUBRESOURCE mapped;
+
+    HRESULT hr = g_pd3dDeviceContext->Map(
+        g_pScreenTexture,
+        0,
+        D3D11_MAP_WRITE_DISCARD,
+        0,
+        &mapped
+    );
+
+    if (SUCCEEDED(hr))
+    {
+        memcpy(
+            mapped.pData,
+            framebuffer,
+            256 * 240 * sizeof(uint32_t)
+        );
+
+        g_pd3dDeviceContext->Unmap(
+            g_pScreenTexture,
+            0
+        );
+    }
+}
+
 // Main code
 int main(int, char**)
 {
@@ -135,6 +194,8 @@ int main(int, char**)
         return 1;
     }
 
+    CreateScreenTexture();
+
     // Show the window
     ::ShowWindow(hwnd, SW_SHOWDEFAULT);
     ::UpdateWindow(hwnd);
@@ -148,7 +209,6 @@ int main(int, char**)
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
 
     // Setup scaling
     ImGuiStyle& style = ImGui::GetStyle();
@@ -161,12 +221,29 @@ int main(int, char**)
 
     ImVec4 clear_color = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
 
+    // Emulator setup
+    Bus nes;
+    std::shared_ptr<Cartridge> cart;
+    
+
     // Main loop
     bool done = false;
-    while (!done)
+    bool full_screen = false;
+
+    static int scale = 3.0f;
+    ImVec2 nes_window = ImVec2(256 * scale, 240 * scale);
+
+    static std::string selectedRom;
+
+    enum class AppState
     {
-        // Poll and handle messages (inputs, window resize, etc.)
-        // See the WndProc() function below for our to dispatch events to the Win32 backend.
+        Launcher,
+        Running
+    };
+
+    AppState state = AppState::Launcher;
+
+    while (!done) {
         MSG msg;
         while (::PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE))
         {
@@ -200,27 +277,107 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        {
-            static std::string selectedRom;
+        if (state == AppState::Launcher) {
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::SetNextWindowSize(io.DisplaySize);
 
-            ImGui::Begin("NES Emulator");
+            ImGui::Begin(
+                "Launcher",
+                nullptr,
+                ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoMove
+            );
 
-            ImGui::Text("Emulador de NES");
+            ImGui::SetCursorPos(ImVec2(10, 10));
 
             if (ImGui::Button("Abrir ROM"))
             {
                 std::string path = OpenFileDialog();
 
-                if (!path.empty())
+                if (!path.empty()) {
                     selectedRom = path;
+
+                    // Load the cartridge
+                    cart = std::make_shared<Cartridge>(selectedRom);
+                    if (cart->ImageValid()) {
+                        // Insert into NES
+                        nes.insertCartridge(cart);
+                        nes_window = ImVec2(256 * scale, 240 * scale);
+
+                        // Reset NES
+                        nes.reset();
+
+                        state = AppState::Running;
+                    }
+                }
             }
+
+            ImGui::SliderInt(
+                "Zoom",
+                &scale,
+                1,
+                8,
+                "%dx"
+            );
 
             ImGui::Separator();
 
-            if (!selectedRom.empty())
-            {
-                ImGui::Text("ROM carregada:");
-                ImGui::TextWrapped("%s", selectedRom.c_str());
+            ImGui::End();
+        } else {
+            // Handle input for controller in port #1
+            nes.controller[0] =
+                (ImGui::IsKeyDown(ImGuiKey_K) ? 0x80 : 0x00) |           // A
+                (ImGui::IsKeyDown(ImGuiKey_L) ? 0x40 : 0x00) |           // B
+                (ImGui::IsKeyDown(ImGuiKey_Backspace) ? 0x20 : 0x00) |   // Select
+                (ImGui::IsKeyDown(ImGuiKey_Enter) ? 0x10 : 0x00) |       // Start
+                (ImGui::IsKeyDown(ImGuiKey_W) ? 0x08 : 0x00) |           // Up
+                (ImGui::IsKeyDown(ImGuiKey_S) ? 0x04 : 0x00) |           // Down
+                (ImGui::IsKeyDown(ImGuiKey_A) ? 0x02 : 0x00) |           // Left
+                (ImGui::IsKeyDown(ImGuiKey_D) ? 0x01 : 0x00);            //Rigth
+
+            if (ImGui::IsKeyPressed(ImGuiKey_F)) {
+                full_screen = !full_screen;
+                g_pSwapChain->SetFullscreenState(full_screen, nullptr);
+            }
+
+            if (ImGui::IsKeyPressed(ImGuiKey_R)) {
+                full_screen = false;
+                g_pSwapChain->SetFullscreenState(full_screen, nullptr);
+                state = AppState::Launcher;
+                nes.reset();
+            }
+
+            do { nes.clock(); } while (!nes.ppu.frame_complete);
+            if (nes.ppu.frame_complete) {
+                UpdateTexture(nes.ppu.GetFrameBuffer());
+                nes.ppu.frame_complete = false;
+            }
+
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::SetNextWindowSize(io.DisplaySize);
+
+            ImGui::Begin(
+                "Running",
+                nullptr,
+                ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoMove
+            );
+
+            if (full_screen) {
+                float fnes_x = ((io.DisplaySize.y * nes_window.x) / nes_window.y);
+                ImGui::SetCursorPos(ImVec2((io.DisplaySize.x/2) - fnes_x/2 , 0));
+                ImGui::Image(
+                    (ImTextureID)g_pScreenSRV,
+                    ImVec2(fnes_x, io.DisplaySize.y-8)
+                );
+            }else {
+                ImGui::SetCursorPos((io.DisplaySize / 2) - (nes_window / 2));
+                ImGui::Image(
+                    (ImTextureID)g_pScreenSRV,
+                    nes_window
+                );
             }
 
             ImGui::End();
