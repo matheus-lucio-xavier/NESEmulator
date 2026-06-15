@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Bus.h"
 
 
@@ -69,9 +71,17 @@ void Bus::insertCartridge(const std::shared_ptr<Cartridge>& cartridge) {
 	this->cart = cartridge;
 	ppu.connectCartridge(cartridge);
 }
-void Bus::reset() {
-	cpu.reset();
-	nSystemClockCounter = 0;
+void Bus::reset()
+{
+    cart->reset();
+    cpu.reset();
+    ppu.reset();
+    nSystemClockCounter = 0;
+    dma_page = 0x00;
+    dma_addr = 0x00;
+    dma_data = 0x00;
+    dma_dummy = true;
+    dma_tansfer = false;
 }
 bool Bus::clock() {
 	ppu.clock();
@@ -118,6 +128,12 @@ bool Bus::clock() {
     if (ppu.nmi) {
         ppu.nmi = false;
         cpu.nmi();
+    }
+
+    if (cart->GetMapper()->irqState())
+    {
+        cart->GetMapper()->irqClear();
+        cpu.irq();
     }
 
 	nSystemClockCounter++;

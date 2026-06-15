@@ -199,7 +199,7 @@ void olc2A03::clock() {
             pulse2_sweep.clock(pulse1_seq.timer, 0);
         }
 
-        //if (bUseRawMode)
+        if (bUseRawMode)
         {
             // Update Pulse1 Channel ================================
             pulse1_seq.clock(pulse1_enable, [](uint32_t& s)
@@ -208,12 +208,11 @@ void olc2A03::clock() {
                     s = ((s & 0x0001) << 7) | ((s & 0x00FE) >> 1);
                 });
 
-            //	pulse1_sample = (double)pulse1_seq.output;
+            pulse1_sample = (double)pulse1_seq.output;
         }
-        //else
+        else
         {
             pulse1_osc.frequency = 1789773.0 / (16.0 * (double)(pulse1_seq.reload + 1));
-            //pulse1_osc.amplitude = (double)(pulse1_env.output - 1) / 16.0;
             pulse1_osc.amplitude = (double)pulse1_env.output / 15.0;
             pulse1_sample = pulse1_osc.sample(dGlobalTime);
 
@@ -223,7 +222,7 @@ void olc2A03::clock() {
                 pulse1_output = 0;
         }
 
-        //if (bUseRawMode)
+        if (bUseRawMode)
         {
             // Update Pulse2 Channel ================================
             pulse2_seq.clock(pulse2_enable, [](uint32_t& s)
@@ -232,13 +231,12 @@ void olc2A03::clock() {
                     s = ((s & 0x0001) << 7) | ((s & 0x00FE) >> 1);
                 });
 
-            //	pulse2_sample = (double)pulse2_seq.output;
+            pulse2_sample = (double)pulse2_seq.output;
 
         }
-        //	else
+        else
         {
             pulse2_osc.frequency = 1789773.0 / (16.0 * (double)(pulse2_seq.reload + 1));
-            //pulse2_osc.amplitude = (double)(pulse2_env.output - 1) / 16.0;
             pulse2_osc.amplitude = (double)pulse1_env.output / 15.0;
             pulse2_sample = pulse2_osc.sample(dGlobalTime);
 

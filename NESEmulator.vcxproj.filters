@@ -96,6 +96,21 @@
     <ClInclude Include="olc2A03.h">
       <Filter>Arquivos de Cabeçalho\APU</Filter>
     </ClInclude>
+    <ClInclude Include="Mapper_001.h">
+      <Filter>Arquivos de Cabeçalho\Mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper_002.h">
+      <Filter>Arquivos de Cabeçalho\Mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper_003.h">
+      <Filter>Arquivos de Cabeçalho\Mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper_004.h">
+      <Filter>Arquivos de Cabeçalho\Mappers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper_066.h">
+      <Filter>Arquivos de Cabeçalho\Mappers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bus.cpp">
@@ -142,6 +157,21 @@
     </ClCompile>
     <ClCompile Include="olc2A03.cpp">
       <Filter>Arquivos de Origem\APU</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapper_001.cpp">
+      <Filter>Arquivos de Origem\Mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapper_002.cpp">
+      <Filter>Arquivos de Origem\Mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapper_003.cpp">
+      <Filter>Arquivos de Origem\Mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapper_004.cpp">
+      <Filter>Arquivos de Origem\Mappers</Filter>
+    </ClCompile>
+    <ClCompile Include="Mapper_066.cpp">
+      <Filter>Arquivos de Origem\Mappers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

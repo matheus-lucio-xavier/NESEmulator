@@ -40,6 +40,8 @@ private:
 	int16_t scanline = 0;
 	int16_t cycle = 0;
 
+    bool odd_frame = false;
+
     // register structures
     union
     {
@@ -141,6 +143,7 @@ private:
 public: // interface
 	void connectCartridge(const std::shared_ptr<Cartridge>& cart);
 	void clock();
+    void reset();
 
     bool nmi = false;
 

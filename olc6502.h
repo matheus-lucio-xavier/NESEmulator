@@ -34,8 +34,6 @@ public:
     // Conecta a CPU com o bus
     void ConnectBus(Bus* n) { bus = n; }
 
-    std::map<uint16_t, std::string> disassemble(uint16_t nStart, uint16_t nStop);
-
     enum FLAGS6502
     {
         C = (1 << 0),	// Carry Bit

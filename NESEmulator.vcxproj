@@ -141,6 +141,11 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Mapper.h" />
     <ClInclude Include="Mapper_000.h" />
+    <ClInclude Include="Mapper_001.h" />
+    <ClInclude Include="Mapper_002.h" />
+    <ClInclude Include="Mapper_003.h" />
+    <ClInclude Include="Mapper_004.h" />
+    <ClInclude Include="Mapper_066.h" />
     <ClInclude Include="olc2A03.h" />
     <ClInclude Include="olc2C02.h" />
     <ClInclude Include="olc6502.h" />
@@ -158,6 +163,11 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mapper.cpp" />
     <ClCompile Include="Mapper_000.cpp" />
+    <ClCompile Include="Mapper_001.cpp" />
+    <ClCompile Include="Mapper_002.cpp" />
+    <ClCompile Include="Mapper_003.cpp" />
+    <ClCompile Include="Mapper_004.cpp" />
+    <ClCompile Include="Mapper_066.cpp" />
     <ClCompile Include="olc2A03.cpp" />
     <ClCompile Include="olc2C02.cpp" />
     <ClCompile Include="olc6502.cpp" />
