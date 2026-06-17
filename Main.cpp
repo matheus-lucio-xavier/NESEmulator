@@ -198,6 +198,7 @@ void CreateScreenTexture()
 
 void UpdateTexture(const uint32_t* framebuffer)
 {
+
     D3D11_MAPPED_SUBRESOURCE mapped;
 
     HRESULT hr = g_pd3dDeviceContext->Map(
@@ -346,6 +347,7 @@ int main(int, char**)
     // Main loop
     bool done = false;
     bool full_screen = false;
+    bool config_open = false;
 
     static int scale = 3;
     static int scaleIndex = 2;
@@ -359,6 +361,36 @@ int main(int, char**)
     };
 
     ImVec2 nes_window = ImVec2(256 * scale, 240 * scale);
+
+    struct ControllerConfig
+    {
+        ImGuiKey A = ImGuiKey_L;
+        ImGuiKey B = ImGuiKey_K;
+        ImGuiKey Select = ImGuiKey_Backspace;
+        ImGuiKey Start = ImGuiKey_Enter;
+        ImGuiKey Up = ImGuiKey_W;
+        ImGuiKey Down = ImGuiKey_S;
+        ImGuiKey Left = ImGuiKey_A;
+        ImGuiKey Right = ImGuiKey_D;
+    };
+
+    ControllerConfig cfg;
+
+    int waitingForKey = -1;
+
+    static bool startCaptureNextFrame = false;
+
+    enum ButtonType
+    {
+        BTN_A,
+        BTN_B,
+        BTN_SELECT,
+        BTN_START,
+        BTN_UP,
+        BTN_DOWN,
+        BTN_LEFT,
+        BTN_RIGHT
+    };
 
     static std::string selectedRom;
 
@@ -438,14 +470,113 @@ int main(int, char**)
                     }
                 }
             }
+
             ImGui::SetCursorPos(ImVec2(100, 10));
 
-            ImGui::SetNextItemWidth(120.0f);
+            if (ImGui::Button("Configurações")) config_open = true;
 
-            if (ImGui::Combo("Escala", &scaleIndex, scales, IM_ARRAYSIZE(scales))) {
-                scale = scaleIndex + 1;
-                nes_window = ImVec2(256 * scale, 240 * scale);
-            };
+            if (config_open) {
+                ImGui::SetNextWindowPos(ImVec2(0, 0));
+                ImGui::SetNextWindowSize(io.DisplaySize);
+
+                ImGui::Begin("Config", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+                if (ImGui::ArrowButton("", ImGuiDir_Left)) config_open = false; 
+
+                ImGui::SetNextItemWidth(240.0f);
+                ImGui::Text("Graphics");
+                ImGui::Separator();
+
+                ImGui::SetNextItemWidth(120.0f);
+                if (ImGui::Combo("Escala", &scaleIndex, scales, IM_ARRAYSIZE(scales))) {
+                    scale = scaleIndex + 1;
+                    nes_window = ImVec2(256 * scale, 240 * scale);
+                };
+
+                ImGui::SetNextItemWidth(240.0f);
+                ImGui::Text("Controls");
+                ImGui::Separator();
+
+               
+                // A
+                if (ImGui::Button(("A: " + std::string(ImGui::GetKeyName(cfg.A))).c_str())) {
+                    waitingForKey = BTN_A;
+                    startCaptureNextFrame = true;
+                }
+                    
+                // B
+                if (ImGui::Button(("B: " + std::string(ImGui::GetKeyName(cfg.B))).c_str()))
+                {
+                    waitingForKey = BTN_B;
+                    startCaptureNextFrame = true;
+                }
+
+                // Select
+                if (ImGui::Button(("Select: " + std::string(ImGui::GetKeyName(cfg.Select))).c_str()))
+                {
+                    waitingForKey = BTN_SELECT;
+                    startCaptureNextFrame = true;
+                }
+                // Start
+                if (ImGui::Button(("Start: " + std::string(ImGui::GetKeyName(cfg.Start))).c_str()))
+                {
+                    waitingForKey = BTN_START;
+                    startCaptureNextFrame = true;
+                }
+                // Up
+                if (ImGui::Button(("Up: " + std::string(ImGui::GetKeyName(cfg.Up))).c_str()))
+                {
+                    waitingForKey = BTN_UP;
+                    startCaptureNextFrame = true;
+                }
+                // Down
+                if (ImGui::Button(("Down: " + std::string(ImGui::GetKeyName(cfg.Down))).c_str()))
+                {
+                    waitingForKey = BTN_DOWN;
+                    startCaptureNextFrame = true;
+                }
+                // Left
+                if (ImGui::Button(("Left: " + std::string(ImGui::GetKeyName(cfg.Left))).c_str()))
+                {
+                    waitingForKey = BTN_LEFT;
+                    startCaptureNextFrame = true;
+                }
+                // Right
+                if (ImGui::Button(("Right: " + std::string(ImGui::GetKeyName(cfg.Right))).c_str()))
+                {
+                    waitingForKey = BTN_RIGHT;
+                    startCaptureNextFrame = true;
+                }
+
+                if (waitingForKey != -1) {
+                    if (startCaptureNextFrame) {
+                        startCaptureNextFrame = false;
+                    }
+                    else {
+                        for (int key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_COUNT; key++) {
+                            if (ImGui::IsKeyPressed((ImGuiKey)key))
+                            {
+                                switch (waitingForKey)
+                                {
+                                case BTN_A:      cfg.A = (ImGuiKey)key; break;
+                                case BTN_B:      cfg.B = (ImGuiKey)key; break;
+                                case BTN_SELECT: cfg.Select = (ImGuiKey)key; break;
+                                case BTN_START:  cfg.Start = (ImGuiKey)key; break;
+                                case BTN_UP:     cfg.Up = (ImGuiKey)key; break;
+                                case BTN_DOWN:   cfg.Down = (ImGuiKey)key; break;
+                                case BTN_LEFT:   cfg.Left = (ImGuiKey)key; break;
+                                case BTN_RIGHT:  cfg.Right = (ImGuiKey)key; break;
+                                }
+
+                                waitingForKey = -1;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                ImGui::End();
+            }
 
             ImGui::Separator();
 
@@ -453,14 +584,14 @@ int main(int, char**)
         } else {
             // Handle input for controller in port #1
             nes.controller[0] =
-                (ImGui::IsKeyDown(ImGuiKey_K) ? 0x80 : 0x00) |           // A
-                (ImGui::IsKeyDown(ImGuiKey_L) ? 0x40 : 0x00) |           // B
-                (ImGui::IsKeyDown(ImGuiKey_Backspace) ? 0x20 : 0x00) |   // Select
-                (ImGui::IsKeyDown(ImGuiKey_Enter) ? 0x10 : 0x00) |       // Start
-                (ImGui::IsKeyDown(ImGuiKey_W) ? 0x08 : 0x00) |           // Up
-                (ImGui::IsKeyDown(ImGuiKey_S) ? 0x04 : 0x00) |           // Down
-                (ImGui::IsKeyDown(ImGuiKey_A) ? 0x02 : 0x00) |           // Left
-                (ImGui::IsKeyDown(ImGuiKey_D) ? 0x01 : 0x00);            //Rigth
+                (ImGui::IsKeyDown(cfg.A) ? 0x80 : 0x00)     |   // A
+                (ImGui::IsKeyDown(cfg.B) ? 0x40 : 0x00)     |   // B
+                (ImGui::IsKeyDown(cfg.Select) ? 0x20 : 0x00) |  // Select
+                (ImGui::IsKeyDown(cfg.Start) ? 0x10 : 0x00) |   // Start
+                (ImGui::IsKeyDown(cfg.Up) ? 0x08 : 0x00)    |   // Up
+                (ImGui::IsKeyDown(cfg.Down) ? 0x04 : 0x00)  |   // Down
+                (ImGui::IsKeyDown(cfg.Left) ? 0x02 : 0x00)  |   // Left
+                (ImGui::IsKeyDown(cfg.Right) ? 0x01 : 0x00);    // Right
 
             if (ImGui::IsKeyPressed(ImGuiKey_F)) {
                 full_screen = !full_screen;
@@ -471,7 +602,7 @@ int main(int, char**)
                 full_screen = false;
                 g_pSwapChain->SetFullscreenState(full_screen, nullptr);
                 state = AppState::Launcher;
-                nes.reset();                
+                nes.reset();
             }
 
             // While de clock():
@@ -505,20 +636,12 @@ int main(int, char**)
                 ImGuiWindowFlags_NoMove
             );
 
-            if (full_screen) {
-                float fnes_x = ((io.DisplaySize.y * nes_window.x) / nes_window.y);
-                ImGui::SetCursorPos(ImVec2((io.DisplaySize.x/2) - fnes_x/2 , 0));
-                ImGui::Image(
-                    (ImTextureID)g_pScreenSRV,
-                    ImVec2(fnes_x, io.DisplaySize.y-8)
-                );
-            }else {
-                ImGui::SetCursorPos((io.DisplaySize / 2) - (nes_window / 2));
-                ImGui::Image(
-                    (ImTextureID)g_pScreenSRV,
-                    nes_window
-                );
-            }
+            ImGui::SetCursorPos((io.DisplaySize / 2) - (nes_window / 2));
+            ImGui::Image(
+                (ImTextureID)g_pScreenSRV,
+                nes_window
+            );
+               
 
             ImGui::End();
         }
